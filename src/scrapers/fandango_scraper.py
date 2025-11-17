@@ -13,7 +13,11 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
+try:
+    # Optional: only used as a fallback if Selenium Manager fails
+    from webdriver_manager.chrome import ChromeDriverManager  # type: ignore
+except Exception:  # pragma: no cover - optional dependency
+    ChromeDriverManager = None  # type: ignore
 from bs4 import BeautifulSoup
 import logging
 
@@ -44,7 +48,8 @@ class FandangoScraper:
         """Set up Chrome WebDriver"""
         chrome_options = Options()
         if self.headless:
-            chrome_options.add_argument("--headless")
+            # Use modern headless mode when available
+            chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
         chrome_options.add_argument("--disable-gpu")
@@ -52,9 +57,21 @@ class FandangoScraper:
         chrome_options.add_argument(
             "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
         )
-
-        service = Service(ChromeDriverManager().install())
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        # Prefer Selenium Manager (built into selenium >= 4.6) to resolve the correct driver
+        try:
+            self.driver = webdriver.Chrome(options=chrome_options)
+            logger.info("Initialized Chrome via Selenium Manager")
+        except Exception as e:
+            logger.warning(
+                "Selenium Manager failed to initialize Chrome (%s). Attempting webdriver-manager fallback...",
+                e,
+            )
+            if ChromeDriverManager is None:
+                # Re-raise original error if webdriver-manager isn't available
+                raise
+            # Fallback: use webdriver-manager to install a matching driver
+            service = Service(ChromeDriverManager().install())
+            self.driver = webdriver.Chrome(service=service, options=chrome_options)
 
     def _close_driver(self):
         """Close the WebDriver"""
