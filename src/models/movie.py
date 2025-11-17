@@ -21,6 +21,7 @@ class Movie:
         voteAverage: Rating 0-10 scale (required)
         voteCount: Number of ratings (required)
         popularity: Popularity score (required)
+        trailer: URL to movie trailer (optional)
     """
     id: int
     title: str
@@ -31,6 +32,7 @@ class Movie:
     releaseDate: Optional[str] = None
     posterPath: Optional[str] = None
     backdropPath: Optional[str] = None
+    trailer: Optional[str] = None
 
     def to_dict(self) -> dict:
         """Convert movie to dictionary for Firestore"""
@@ -63,5 +65,6 @@ class Movie:
             self.backdropPath != other.backdropPath or
             self.voteAverage != other.voteAverage or
             self.voteCount != other.voteCount or
-            self.popularity != other.popularity
+            self.popularity != other.popularity or
+            self.trailer != other.trailer
         )

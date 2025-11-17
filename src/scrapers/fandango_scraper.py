@@ -315,11 +315,6 @@ class FandangoScraper:
             # Generate movie ID
             movie_id = self._generate_movie_id(title, fandango_id)
 
-            # Store trailer URL in backdropPath for now (we can adjust Movie model later if needed)
-            # Or we can add it to overview
-            if trailer_url and overview:
-                overview += f"\n\nTrailer: {trailer_url}"
-
             return Movie(
                 id=movie_id,
                 title=title,
@@ -329,7 +324,8 @@ class FandangoScraper:
                 backdropPath=backdrop_path,
                 voteAverage=vote_average,
                 voteCount=vote_count,
-                popularity=popularity
+                popularity=popularity,
+                trailer=trailer_url
             )
 
         except Exception as e:
