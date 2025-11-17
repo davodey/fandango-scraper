@@ -341,10 +341,13 @@ class FandangoScraper:
         return None
 
     def _extract_title_from_detail(self, soup: BeautifulSoup) -> Optional[str]:
-        """Extract title from movie detail page"""
+        """Extract title from movie detail page and remove year"""
         title_elem = soup.select_one('h1.movie-detail-header__title')
         if title_elem:
-            return title_elem.get_text(strip=True)
+            title = title_elem.get_text(strip=True)
+            # Remove year pattern like "(2025)" from the end of the title
+            title = re.sub(r'\s*\(\d{4}\)\s*$', '', title)
+            return title.strip()
         return None
 
     def _extract_overview_from_detail(self, soup: BeautifulSoup) -> Optional[str]:
