@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  scraper:
+    build: .
+    container_name: fandango-scraper
+    volumes:
+      # Mount Firebase credentials
+      - ./firebase-credentials.json:/app/firebase-credentials.json:ro
+      # Mount logs directory
+      - ./logs:/app/logs
+      # Mount .env file
+      - ./.env:/app/.env:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    # Uncomment for scheduled runs
+    # command: >
+    #   sh -c "while true; do
+    #     python main.py;
+    #     echo 'Sleeping for 24 hours...';
+    #     sleep 86400;
+    #   done"
